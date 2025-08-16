@@ -54,17 +54,26 @@ namespace ResolveDependencies
             int numDependencies = (lineIndex >= lines.Length) ? 0 : int.Parse(lines[lineIndex++]);
             var dependencies = new Dictionary<Package, List<Package>>();   
             for (int i = 0;i < numDependencies;i++) {
+
                 if (lineIndex >= lines.Length) break;
                 var line = lines[lineIndex++];
                 if (string.IsNullOrEmpty(line)) continue;
-                var parts = line.Split(',');
-                var package = new Package(parts[0], parts[1]);
-                var dependency = new Package(parts[2], parts[3]);
 
-                if (!dependencies.ContainsKey(package)){ 
-                    dependencies[package] = new List<Package>(); 
+                var parts = line.Split(',');
+                // A dependency line must have at least 4 parts (p1,v1,p2,v2) and an even number of parts
+                if (parts.Length >= 4 && parts.Length % 2 == 0)
+                {
+                    var package = new Package(parts[0], parts[1]);
+                    if (!dependencies.ContainsKey(package))
+                        dependencies[package] = new List<Package>();
+
+                    // Loop through the dependencies on the current line, which start at index 2
+                    for (int j = 2; j < parts.Length; j += 2)
+                    {
+                        var dependency = new Package(parts[j], parts[j + 1]);
+                        dependencies[package].Add(dependency);
+                    }
                 }
-                dependencies[package].Add(dependency);
              }
 
             bool isValid = _resolver.IsValid(initialPackages, dependencies);
