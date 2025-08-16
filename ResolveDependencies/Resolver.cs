@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace ResolveDependencies
 {
-    public record Package (string Name, string Version);
+    public class Resolver
+    {
+
+    }
 }
